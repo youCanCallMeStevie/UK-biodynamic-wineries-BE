@@ -64,4 +64,38 @@ UserSchema.methods.comparePass = async function (pass) {
   }
 };
 
-module.exports = mongoose.model("users", UserSchema);
+
+UserSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject._v;
+
+  return userObject;
+};
+
+// UserSchema.statics.findByCredentials = async function (email, plainPW) {
+//   const user = await this.findOne({ email });
+//   console.log("findByCredentials user", user);
+
+//   if (user) {
+//     const match = await bcrypt.compare(plainPW, user.password);
+//     if (match) return user;
+//   } else {
+//     return null;
+//   }
+// };
+
+// UserSchema.pre("save", async function (next) {
+//   const user = this;
+//   const plainPW = user.password;
+//   if (user.isModified("password")) {
+//     user.password = await bcrypt.hash(plainPW, 10);
+//   }
+//   next();
+// });
+
+
+const UserModel = model("users", UserSchema);
+module.exports = UserModel;

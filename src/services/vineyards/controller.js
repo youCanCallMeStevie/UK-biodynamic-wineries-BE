@@ -2,6 +2,9 @@
 const express = require("express");
 const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
+let nodeGeocoder = require("node-geocoder");
+const haversine = require("haversine-distance");
+const moment = require("moment");
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -13,6 +16,12 @@ const q2m = require("query-to-mongo");
 
 //Error Handling
 const ApiError = require("../../utils/ApiError");
+
+
+let options = {
+  provider: "openstreetmap",
+};
+let geoCoder = nodeGeocoder(options);
 
 const getAuthUserSavedVineyardsController = async (req, res, next) => {
   try {
@@ -65,70 +74,91 @@ const getAllVineyardsController = async (req, res, next) => {
 //     }
 //   }
 
-// const addVineyardController = (req, res, next) => {
-// const imagesUris = [];
-//       if (req.files) {
-//         const files = req.files;
-//         files.map((file) => imagesUris.push(file.path));
-//       }
-//       if (req.file && req.file.path) {
-//         // if only one image uploaded
-//         imagesUris = req.file.path; // add the single
-//       }
-//       const { street, city, state, country, zip } = req.body;
-//       try {
-//         let address = await geoCoder.geocode(
-//           `${street} ${city} ${zip} ${state} ${country} `
-//         );
-//         let amenities = await req.body.amenities.split(",");
+const addVineyardController = (req, res, next) => {
+const imagesUris = [];
+if (! req.user._id) throw new ApiError(401, "You are unauthorized.");
 
-//         const newListing = new Listing({
-//           ...req.body,
-//           address,
-//           images: imagesUris,
-//           amenities,
-//           host: req.user.id,
-//           createdAt: Date.now(),
-//           updatedAt: Date.now(),
-//         });
-//         newListing.save();
-//         res.send(newListing);
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     }
+      if (req.files) {
+        const files = req.files;
+        files.map((file) => imagesUris.push(file.path));
+      }
+      if (req.file && req.file.path) {
+        // if only one image uploaded
+        imagesUris = req.file.path; // add the single
+      }
+      const { addressLine1, addressLine2, city, postcode } = req.body;
+      try {
+        let address = await geoCoder.geocode(
+          `${addressLine1} ${addressLine2} ${city} ${postcode}`
+        );
+        const newListing = new VineyardModel({
+          ...req.body,
+          address,
+          images: imagesUris,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        newListing.save();
+        res.send(newListing);
+} catch (error) {
+        console.log(error);
+next(error)
+      }
+    }
+
 
 const editVineyardController = async (req, res, next) => {
-  try {
-    if (req.user._id) {
-      const editedVineyard = await VineyardModel.findByIdAndUpdate(
-        req.params.vineyardId,
-        req.body,
-        { runValidators: true }
-      );
-      if (editedVineyard) {
-        res.status(200).send(editedVineyard);
-      }
-    } else throw new ApiError(401, "You are unauthorized.");
-  } catch (error) {
-    console.log(error);
-    next(error);
+  if (! req.user._id) throw new ApiError(401, "You are unauthorized.");
+  const imagesUris = [];
+    if (req.files) {
+      const files = req.files;
+      files.map((file) => imagesUris.push(file.path));
+    }
+    if (req.file && req.file.path) {
+      // if only one image uploaded
+      imagesUris = req.file.path; // add the single
+    }
+    const { addressLine1, addressLine2, city, postcode } = req.body;
+    try {
+
+     const { vineyardId } = req.params;
+    if (!(await VineyardModel.findById(vineyardId)))
+     throw new ApiError(404, `Vineyard not found`);
+      let address = await geoCoder.geocode(
+        `${addressLine1} ${addressLine2} ${city} ${postcode}`
+        );
+      const editedVineyard = {
+        ...req.body,
+        address,
+        images: imagesUris,
+        updatedAt: Date.now(),
+      };
+      const vineyardToEdit = await VineyardModel.findByIdAndUpdate(id, editedListing);
+      res.send({
+        edited: editedVineyard._id,
+        updatedAt: vineyardToEdit.updatedAt,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-};
 
 
-const deleteVineyardController = async (req, res, next) => {
-  try {
-    if (req.user._id) {
+  const deleteVineyardController   = async (req, res, next) => {
+    
+    try {
+      if(req.user._id){
+      const { vineyardId } = req.params;
       const deleteVineyard = await VineyardModel.findByIdAndDelete(req.params.vineyardId);
       if (deleteVineyard) res.status(200).send("Deleted");
-      else throw new ApiError(404, "No vineyard found");
+      else throw new ApiError(404, "No vineyard found"); //no post was found
     } else throw new ApiError(401, "You are unauthorized.");
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-}
+    } catch (error) {
+   console.log(error)
+      next(error);
+    }
+  };
 
 const likeVineyardController = async (req, res, next) => {
   try {
@@ -172,7 +202,57 @@ const unlikeVineyardController = async (req, res, next) => {
         }
       }
 
+const searchVineyardCityController = async (req, res, next) => {
+      try {
+        const result = await geoCoder.geocode(req.query.city);
+        const lat = result[0].latitude;
+        const long = result[0].longitude;
+        const cords1 = [long, lat];
+        let results = await VineyardModel.find();
+        results = await results.filter((result) => result.address);
+        results = results.filter(
+          (loc) =>
+            haversine(cords1, [loc.address[0].longitude, loc.address[0].latitude]) <
+            40000
+        );
+        res.status(200).send({ results });
 
+      } catch (error) {
+        console.log(error);
+        next(error);
+      }
+    }
+
+
+    const searchVineyardResultsController = async (req, res, next) => {
+      const {city} = req.query
+      try {
+      const vineyards = await VineyardModel.find();
+        let filterList = listings;
+    
+        if (city) {
+          const coord = await geoCoder.geocode(city);
+          const lat = coord[0].latitude;
+          const long = coord[0].longitude;
+          const cords1 = [long, lat];
+          filterList = await vineyards.filter((result) => result.address);
+          filterList = filterList.filter(
+            (loc) =>
+              haversine(cords1, [
+                loc.address[0].longitude,
+                loc.address[0].latitude,
+              ]) < 40000
+          );
+        }
+        console.log("filterList", filterList);
+        res.status(200).send({ filterList });
+
+      } catch (error) {
+        console.log(error);
+        next(error);
+      }
+
+    }
 
 module.exports = {
   getAllVineyardsController,
