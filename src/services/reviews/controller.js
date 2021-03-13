@@ -14,16 +14,16 @@ const ApiError = require("../../utils/ApiError");
 //post new comment
 const postReviewController = async (req, res, next) => {
   const { vineyardId } = req.params;
-  const user = req.user.username;
+  const user = req.user._id;
   try {
     if (!(await VineyardModel.findById(vineyardId)))
       throw new ApiError(404, `post not found`);
     const newReview = new ReviewModel(req.body);
     newReview.userId = user;
     const { _id } = await newReview.save();
-    const comment = await VineyardModel.findByIdAndUpdate(
+    const review = await VineyardModel.findByIdAndUpdate(
       vineyardId,
-      { $addToSet: { comments: _id } },
+      { $addToSet: { reviews: _id } },
       { runValidators: true, new: true }
     );
     res.status(200).send({ _id });
@@ -38,16 +38,16 @@ const getVineyardReviewsController = async (req, res, next) => {
   try {
     const { vineyardId } = req.params;
     if (vineyardId) {
-      const post = await VineyardModel.findOne({ _id: vineyardId })
+      const vineyard = await VineyardModel.findOne({ _id: vineyardId })
         .populate({
-          path: "comments",
+          path: "reviews",
         })
         .sort({ createdAt: -1 });
-      console.log("XX Post", post);
-      if (post) {
-        res.status(200).send(post);
-      } else res.status(200).json({ message: "no comments for this post" });
-    } else throw new ApiError(404, "no post found");
+      console.log("vineyard reviews controller", vineyard);
+      if (vinyard) {
+        res.status(200).send(vineyard);
+      } else res.status(200).json({ message: "no reviews for this vineyard" });
+    } else throw new ApiError(404, "no vineyard found");
   } catch (error) {
     console.log(error);
     next(error);
@@ -57,11 +57,11 @@ const getVineyardReviewsController = async (req, res, next) => {
 //owner to edit their own comment on a specific post
 const editReviewController = async (req, res, next) => {
   const { reviewId } = req.params;
-  const user = req.user;
+  const userId = req.user._id;
   const reviewToEdit = await ReviewModel.findById(reviewId);
   try {
-    if (reviewToEdit.userId != user.username)
-      throw new ApiError(401, `Only the owner of this comment can edit`);
+    if (reviewToEdit.userId != userId)
+      throw new ApiError(401, `Only the owner of this review can edit`);
     const updatedComment = await ReviewModel.findByIdAndUpdate(
       reviewId,
       req.body,
@@ -80,13 +80,13 @@ const editReviewController = async (req, res, next) => {
 //owner to delete their own comment on a specific post
 const deleteReviewController = async (req, res, next) => {
   const { reviewId, vineyardId } = req.params;
-  const user = req.user;
+  const userId = req.user._id;
   const reviewToEdit = await ReviewModel.findById(reviewId);
   try {
-    if (reviewToEdit.userId != user.username)
-      throw new ApiError(401, `Only the owner of this comment can edit`);
+    if (reviewToEdit.userId != userId)
+      throw new ApiError(401, `Only the owner of this review can delete`);
     if (!(await ReviewModel.findById(reviewId)))
-      throw new ApiError(404, `Comment not found`);
+      throw new ApiError(404, `Review not found`);
     const post = await VineyardModel.findByIdAndUpdate(
       vineyardId,
       { $pull: { comments: reviewId } },
@@ -106,13 +106,13 @@ const likeReviewController = async (req, res, next) => {
     const { reviewId } = req.params;
     const userId = req.user._id;
     if (!(await ReviewModel.findById(reviewId)))
-      throw new ApiError(404, `Comment not found`);
+      throw new ApiError(404, `Review not found`);
     const user = await UserModel.findByIdAndUpdate(
       userId,
       { $addToSet: { likedComments: reviewId } },
       { runValidators: true, new: true }
     );
-    const likedPost = await ReviewModel.findByIdAndUpdate(reviewId, {
+    const likedReview = await ReviewModel.findByIdAndUpdate(reviewId, {
       $addToSet: { likes: req.user.username },
     });
     res.status(200).send({ reviewId });
@@ -128,10 +128,10 @@ const unlikeReviewController = async (req, res, next) => {
     const { reviewId } = req.params;
     const userId = req.user._id;
     if (!(await ReviewModel.findById(reviewId)))
-      throw new ApiError(404, `Comment not found`);
+      throw new ApiError(404, `Review not found`);
     const user = await UserModel.findByIdAndUpdate(
       userId,
-      { $pull: { likedComments: reviewId } },
+      { $pull: { likes: reviewId } },
       { runValidators: true, new: true }
     );
     const unlikedComment = await ReviewModel.findByIdAndUpdate(reviewId, {

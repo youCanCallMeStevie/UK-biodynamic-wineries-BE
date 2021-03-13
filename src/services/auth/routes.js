@@ -4,7 +4,7 @@ const authRoutes = express.Router();
 const passport = require("passport");
 
 //Middlewares
-const loginSchema = require("../../utils/validation/validationSchema");
+const valSchema = require("../../utils/validation/validationSchema");
 const validate = require("../../utils/validation/validationMiddleware");
 const authorizeUser = require("../../middlewares/auth");
 
@@ -27,7 +27,7 @@ authRoutes.get(
   googleCallBackController
 );
 
-authRoutes.post("/login", validate(loginSchema), loginController);
+authRoutes.post("/login", validate(valSchema.loginSchema), loginController);
 
 authRoutes.post("/refresh", refreshController);
 

@@ -38,7 +38,7 @@ vineyardRoutes.get("/search/city", searchVineyardCityController);
 
 
 //add vineyard, according to the schema
-vineyardRoutes.post("/:", authorizeUser, validate(valSchema.vineyardSchema), upload.array("images"), addVineyardController);
+vineyardRoutes.post("/", authorizeUser, upload.array("images"), addVineyardController);
 
 
 //edit a specific vineyard, according to the schema

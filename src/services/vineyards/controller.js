@@ -2,9 +2,14 @@
 const express = require("express");
 const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
-const Nodegeocoder = require("node-geocoder");
+// const NodeGeocoder = require('node-geocoder');
+// let options = {
+//   provider: "openstreetmap",
+// };
+// let geocoder = NodeGeocoder(options);
 const haversine = require("haversine-distance");
 const moment = require("moment");
+const { getAddressDetails } = require("../../utils/postionStack");
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -16,11 +21,6 @@ const ReviewModel = require("../reviews/schema");
 
 //Error Handling
 const ApiError = require("../../utils/ApiError");
-
-const options = {
-  provider: "openstreetmap",
-};
-const geocoder = Nodegeocoder(options);
 
 const getAuthUserSavedVineyardsController = async (req, res, next) => {
   try {
@@ -53,6 +53,38 @@ const getAllVineyardsController = async (req, res, next) => {
   }
 };
 
+// const addVineyardController = async (req, res, next) => {
+//   const imagesUris = [];
+//   if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+
+//   if (req.files) {
+//     const files = req.files;
+//     files.map(file => imagesUris.push(file.path));
+//   }
+//   if (req.file && req.file.path) {
+//     // if only one image uploaded
+//     imagesUris = req.file.path; // add the single
+//   }
+//   console.log("req.body.address", req.body.address)
+//   const { addressLine1, addressLine2, city, postcode } = req.body.address;
+//   console.log("postcode", postcode)
+//   try {
+//     const addressLatLong = await geocoder.geocode(
+//       `${addressLine1} ${addressLine2} ${city} ${postcode}`
+//     );
+//     console.log("ADDRESS", addressLatLong);
+//     const newVineyard = new VineyardModel({
+//       ...req.body,
+//       address: {...addressLatLong},
+//       images: imagesUris,
+//     });
+//     const { _id } = await newVineyard.save();
+//     res.send(_id);
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// };
 // const photoVineyardController = async (req, res, next) => {
 //   try {
 //       const user = req.user._id;
@@ -74,31 +106,25 @@ const getAllVineyardsController = async (req, res, next) => {
 //   }
 
 const addVineyardController = async (req, res, next) => {
-  const imagesUris = [];
   if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+  console.log("req.body.address", req.body.address);
+  const { addressLine1, addressLine2, city, postcode } = req.body.address;
+  console.log("postcode", postcode);
 
-  if (req.files) {
-    const files = req.files;
-    files.map(file => imagesUris.push(file.path));
-  }
-  if (req.file && req.file.path) {
-    // if only one image uploaded
-    imagesUris = req.file.path; // add the single
-  }
-  const { addressLine1, addressLine2, city, postcode } = req.body;
   try {
-    const address = await geocoder.geocode(
-      `${addressLine1} ${addressLine2} ${city} ${postcode}`
-    );
-    const newListing = new VineyardModel({
+    const address = 
+    // `Dew Lane Peasmarsh East Sussex TN316XD United Kingdom`;
+   `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
+
+    const addressDetails = await getAddressDetails(address);
+const details = addressDetails.data
+    const newVineyard = new VineyardModel({
       ...req.body,
-      address,
-      images: imagesUris,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      address: {address, details},
     });
-    newListing.save();
-    res.send(newListing);
+    console.log("newVineyard", newVineyard);
+    const { _id } = await newVineyard.save();
+    res.send(_id);
   } catch (error) {
     console.log(error);
     next(error);

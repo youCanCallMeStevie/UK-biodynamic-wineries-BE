@@ -7,10 +7,6 @@ const ReviewSchema = new Schema(
       required: true,
     },
     userId: { type: String },
-    vineyardId: {
-      type: String,
-      required: false,
-    },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
   },
   { timestamps: true }
