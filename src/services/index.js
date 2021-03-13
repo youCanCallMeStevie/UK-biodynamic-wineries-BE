@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const authRoutes = require("./auth");
-const vineyardRoutes = require("./vineyards");
-const userRoutes = require("./users");
+const authRoutes = require("./auth/routes");
+const vineyardRoutes = require("./vineyards/routes");
+const userRoutes = require("./users/routes");
 
 router.use("/auth", authRoutes);
 router.use("/vineyards", vineyardRoutes)

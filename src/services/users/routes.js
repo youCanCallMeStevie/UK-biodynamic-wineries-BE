@@ -3,14 +3,38 @@ const express = require("express");
 const userRoutes = express.Router();
 
 //Middlewares
-const userSchema = require("../../utils/validation/validationSchema");
+const valSchema = require("../../utils/validation/validationSchema");
 const validate = require("../../utils/validation/validationMiddleware");
 const authorizeUser = require("../../middlewares/auth");
+const upload = require("../../utils/cloudinary/users");
 
-//import controllers 
+//import controllers
 const {
-    registerController,
-    getAuthUserController,
-    editAuthUserController,
-    deleteAuthUserController,
+  registerController,
+  authUserUploadController,
+  getAuthUserController,
+  editAuthUserController,
+  deleteAuthUserController,
 } = require("./controller.js");
+
+userRoutes.post(
+  "/register",
+  validate(valSchema.userSchema),
+  registerController
+);
+
+userRoutes.post(
+  "/upload",
+  authorizeUser,
+  upload.single("image"),
+  authUserUploadController
+);
+
+userRoutes.post("/me", authorizeUser, getAuthUserController);
+
+userRoutes.put("/me", authorizeUser, validate(valSchema.userSchema), editAuthUserController);
+
+
+userRoutes.delete("/me", authorizeUser, deleteAuthUserController);
+
+module.exports = userRoutes;

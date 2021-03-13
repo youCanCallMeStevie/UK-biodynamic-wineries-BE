@@ -1,6 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const UserModel = require("../../../../Models/User");
+const UserModel = require("../../../../services/users/schema");
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BE_URI } = process.env;
 const { generateTokens } = require("../../tokens");
 

@@ -10,18 +10,27 @@ const authorizeUser = require("../../middlewares/auth");
 
 //import controllers from
 const {
-    loginController,
-    refreshController,
-    logoutController,
-    googleCallBackController
+  loginController,
+  refreshController,
+  logoutController,
+  googleCallBackController,
 } = require("./controller.js");
 
+authRoutes.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
 authRoutes.get(
-    "/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
-  
-  authRoutes.get(
-    "/google/callback",
-    passport.authenticate("google", { failureRedirect: "/login" }), googleCallBackController)
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  googleCallBackController
+);
+
+authRoutes.post("/login", validate(loginSchema), loginController);
+
+authRoutes.post("/refresh", refreshController);
+
+authRoutes.post("/logout", authorizeUser, logoutController);
+
+module.exports = authRoutes;

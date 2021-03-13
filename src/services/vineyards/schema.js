@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const { Schema, model } = require("mongoose");
 
-const ListingSchema = new mongoose.Schema(
+const VineyardSchema = new mongoose.Schema(
   {
-    name: String,
+    name: { type: String, required: true },
     address: {
       addressLine1: { type: String, required: true },
       addressLine2: { type: String, required: false },
-      city: { type: String, required: false },
+      city: { type: String, required: true },
       postcode: { type: String, required: true },
     },
     description: String,
@@ -41,8 +41,8 @@ const ListingSchema = new mongoose.Schema(
     email: String,
     website: String,
     phone: String,
-    rooms: String,
-    food: String,
+    rooms: Boolean,
+    food: Boolean,
     reviews: [{ type: Schema.Types.ObjectId, ref: "reviews" }],
   },
   { timestamps: true }

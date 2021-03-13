@@ -1,6 +1,5 @@
 const { error } = require("console");
-const { verifyAccessToken } = require("../../Lib/auth/tokens");
-const authRoutes = require("../../services/auth");
+const { verifyAccessToken } = require("../../utils/auth/tokens");
 
 const authorizeUser = async (req, res, next) => {
   try {
