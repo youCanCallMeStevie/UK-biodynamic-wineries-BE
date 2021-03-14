@@ -42,7 +42,10 @@ vineyardRoutes.post("/", authorizeUser, upload.array("images"), addVineyardContr
 
 
 //edit a specific vineyard, according to the schema
-vineyardRoutes.put("/:vineyardId", authorizeUser, validate(valSchema.vineyardSchema), upload.array("images"), editVineyardController);
+vineyardRoutes.put("/:vineyardId", 
+// authorizeUser, 
+// validate(valSchema.vineyardSchema), 
+upload.array("images"), editVineyardController);
 
 
 //delete a specific vineyard

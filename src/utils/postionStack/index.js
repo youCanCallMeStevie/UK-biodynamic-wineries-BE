@@ -4,7 +4,9 @@ const axios = require('axios');
 const getAddressDetails = async (address) => {
     const params = {
         access_key: '3ec25b8b53f375610fcdf6171ded41de',
-        query: `${address}`
+        query: `${address}`,
+        country_module: 1,
+        sun_module: 1
       }
     try {
         const res = await axios.get('http://api.positionstack.com/v1/forward', {params});

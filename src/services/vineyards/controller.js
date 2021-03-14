@@ -34,8 +34,7 @@ const getAuthUserSavedVineyardsController = async (req, res, next) => {
         user.following.includes(vineyard._id)
       );
       console.log("likedVineyards", likedVineyards);
-
-      res.status(200).send(likedVineyards);
+      res.status(200).json({ likedVineyards });
     } else throw new ApiError(401, "You are not unauthorized.");
   } catch (error) {
     console.log(error);
@@ -46,93 +45,17 @@ const getAuthUserSavedVineyardsController = async (req, res, next) => {
 const getAllVineyardsController = async (req, res, next) => {
   try {
     const vineyards = await VineyardModel.find();
-    res.status(200).send(vineyards);
+    res.status(200).json({ vineyards });
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
-// const addVineyardController = async (req, res, next) => {
-//   const imagesUris = [];
-//   if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
-
-//   if (req.files) {
-//     const files = req.files;
-//     files.map(file => imagesUris.push(file.path));
-//   }
-//   if (req.file && req.file.path) {
-//     // if only one image uploaded
-//     imagesUris = req.file.path; // add the single
-//   }
-//   console.log("req.body.address", req.body.address)
-//   const { addressLine1, addressLine2, city, postcode } = req.body.address;
-//   console.log("postcode", postcode)
-//   try {
-//     const addressLatLong = await geocoder.geocode(
-//       `${addressLine1} ${addressLine2} ${city} ${postcode}`
-//     );
-//     console.log("ADDRESS", addressLatLong);
-//     const newVineyard = new VineyardModel({
-//       ...req.body,
-//       address: {...addressLatLong},
-//       images: imagesUris,
-//     });
-//     const { _id } = await newVineyard.save();
-//     res.send(_id);
-//   } catch (error) {
-//     console.log(error);
-//     next(error);
-//   }
-// };
-// const photoVineyardController = async (req, res, next) => {
-//   try {
-//       const user = req.user._id;
-//       if (user) {
-//         const image = req.file && req.file.path;
-//         console.log("image", image);
-//         const addImage = await VineyardModel({
-//           ...req.body,
-//           image,
-//           authorId: user,
-//         });
-//         const { _id } = await newPost.save();
-//         res.status(200).send({ newPost });
-//       } else throw new ApiError(401, "You are unauthorized.");
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   }
-
-const addVineyardController = async (req, res, next) => {
-  if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
-  console.log("req.body.address", req.body.address);
-  const { addressLine1, addressLine2, city, postcode } = req.body.address;
-  console.log("postcode", postcode);
-
-  try {
-    const address = 
-    // `Dew Lane Peasmarsh East Sussex TN316XD United Kingdom`;
-   `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
-
-    const addressDetails = await getAddressDetails(address);
-const details = addressDetails.data
-    const newVineyard = new VineyardModel({
-      ...req.body,
-      address: {address, details},
-    });
-    console.log("newVineyard", newVineyard);
-    const { _id } = await newVineyard.save();
-    res.send(_id);
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
-
-const editVineyardController = async (req, res, next) => {
-  if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+const photoVineyardController = async (req, res, next) => {
+  const { vineyardId } = req.params;
+  if (!(await VineyardModel.findById(vineyardId)))
+    throw new ApiError(404, `Vineyard not found`);
   const imagesUris = [];
   if (req.files) {
     const files = req.files;
@@ -140,30 +63,93 @@ const editVineyardController = async (req, res, next) => {
   }
   if (req.file && req.file.path) {
     // if only one image uploaded
-    imagesUris = req.file.path; // add the single
+    imagesUris = req.file.path;
   }
-  const { addressLine1, addressLine2, city, postcode } = req.body;
+  try {
+    if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+    const addImage = await VineyardModel.findByIdAndUpdate(
+      vineyardId,
+      {
+        $addToSet: { images: imagesUris },
+      },
+      { runValidators: true, new: true }
+    );
+    res.status(200).json({ edited: vineyardId, updatedAt: addImage.updatedAt });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const addVineyardController = async (req, res, next) => {
+  const imagesUris = [];
+  if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+  if (req.files) {
+    const files = req.files;
+    files.map(file => imagesUris.push(file.path));
+  }
+  if (req.file && req.file.path) {
+    // if only one image uploaded
+    imagesUris = req.file.path;
+  }
+  const {
+    addressLine1,
+    addressLine2,
+    locality,
+    region,
+    postal_code,
+    country,
+  } = req.body.address;
+  try {
+    const address = `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
+    const addressDetails = await getAddressDetails(address);
+    const details = addressDetails.data[0];
+    const newVineyard = new VineyardModel({
+      ...req.body,
+      address: { details, address },
+      images: imagesUris,
+    });
+    const { _id } = await newVineyard.save();
+    res.status(200).json({ _id });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const editVineyardController = async (req, res, next) => {
   try {
     const { vineyardId } = req.params;
     if (!(await VineyardModel.findById(vineyardId)))
       throw new ApiError(404, `Vineyard not found`);
-    const address = await geocoder.geocode(
-      `${addressLine1} ${addressLine2} ${city} ${postcode}`
-    );
+    const {
+      addressLine1,
+      addressLine2,
+      locality,
+      region,
+      postal_code,
+      country,
+    } = req.body.address;
+    const address = `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
+    const addressDetails = await getAddressDetails(address);
+    const details = addressDetails.data[0];
+
     const editedVineyard = {
       ...req.body,
-      address,
-      images: imagesUris,
-      updatedAt: Date.now(),
+      address: { details, address },
     };
+    console.log("editedVineyard", editedVineyard);
     const vineyardToEdit = await VineyardModel.findByIdAndUpdate(
-      id,
-      editedListing
+      vineyardId,
+      editedVineyard,
+      { runValidators: true }
     );
-    res.send({
-      edited: editedVineyard._id,
-      updatedAt: vineyardToEdit.updatedAt,
-    });
+    if (vineyardToEdit) {
+      res.status(200).json({
+        edited: editedVineyard._id,
+        updatedAt: vineyardToEdit.updatedAt,
+      });
+    } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
     next(error);
@@ -200,7 +186,7 @@ const likeVineyardController = async (req, res, next) => {
     const likedVineyard = await VineyardModel.findByIdAndUpdate(vineyardId, {
       $addToSet: { likes: req.user._id },
     });
-    res.status(200).send({ vineyardId });
+    res.status(200).json({ vineyardId });
   } catch (error) {
     console.log(error);
     next(error);
@@ -221,7 +207,7 @@ const unlikeVineyardController = async (req, res, next) => {
     const unlikedVineyard = await VineyardModel.findByIdAndUpdate(vineyardId, {
       $pull: { likes: userId },
     });
-    res.status(200).send({ vineyardId });
+    res.status(200).json({ vineyardId });
   } catch (error) {
     console.log(error);
     next(error);
@@ -241,7 +227,7 @@ const searchVineyardCityController = async (req, res, next) => {
         haversine(cords1, [loc.address[0].longitude, loc.address[0].latitude]) <
         40000
     );
-    res.status(200).send({ results });
+    res.status(200).json({ results });
   } catch (error) {
     console.log(error);
     next(error);
@@ -269,7 +255,7 @@ const searchVineyardResultsController = async (req, res, next) => {
       );
     }
     console.log("filterList", filterList);
-    res.status(200).send({ filterList });
+    res.status(200).json({ filterList });
   } catch (error) {
     console.log(error);
     next(error);
