@@ -13,6 +13,7 @@ const upload = require("../../utils/cloudinary/vineyards");
 //import controllers from
 const {
     getAllVineyardsController,
+    getOneVineyardController,
     getAuthUserSavedVineyardsController,
     addVineyardController,
     editVineyardController,
@@ -20,6 +21,7 @@ const {
     likeVineyardController,
     unlikeVineyardController,
     searchVineyardCityController,
+    photoVineyardController,
     // searchVineyardResultsController
 } = require("./controller.js");
 
@@ -33,19 +35,26 @@ vineyardRoutes.get("/me", authorizeUser, getAuthUserSavedVineyardsController);
 //get all vineyards on database
 vineyardRoutes.get("/", getAllVineyardsController);
 
+//get one vineyard from  database
+vineyardRoutes.get("/:vineyardId", getOneVineyardController);
+
 //search vineyards on database
 vineyardRoutes.get("/search/city", searchVineyardCityController);
 
 
 //add vineyard, according to the schema
-vineyardRoutes.post("/", authorizeUser, upload.array("images"), addVineyardController);
+vineyardRoutes.post("/", authorizeUser, validate(valSchema.vineyardSchema), addVineyardController);
 
 
 //edit a specific vineyard, according to the schema
 vineyardRoutes.put("/:vineyardId", 
-// authorizeUser, 
-// validate(valSchema.vineyardSchema), 
-upload.array("images"), editVineyardController);
+authorizeUser, 
+validate(valSchema.vineyardSchema), 
+ editVineyardController);
+
+//add photo to specific, according to the schema
+vineyardRoutes.post("/:vineyardId/upload", authorizeUser, 
+ upload.array("images"), photoVineyardController);
 
 
 //delete a specific vineyard
@@ -57,7 +66,7 @@ vineyardRoutes.post("/:vineyardId/like", authorizeUser, likeVineyardController);
 
 
 //Remove a vineyard to your liked list
-vineyardRoutes.post("/:vineyardId/like", authorizeUser, unlikeVineyardController);
+vineyardRoutes.put("/:vineyardId/unlike", authorizeUser, unlikeVineyardController);
 
 
 module.exports = vineyardRoutes;

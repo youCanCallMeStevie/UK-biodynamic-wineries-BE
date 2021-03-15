@@ -38,17 +38,17 @@ const UserSchema = new mongoose.Schema(
     refreshToken: String,
   },
   {
-    toJSON: {
-      virtuals: true,
-      transform: function (doc, ret) {
-        delete ret.id;
-        delete ret.password;
-        delete ret.createdAt;
-        delete ret.updatedAt;
-        delete ret.googleId;
-        return ret;
-      },
-    },
+    // toJSON: {
+    //   virtuals: true,
+    //   transform: function (doc, ret) {
+    //     delete ret.id;
+    //     delete ret.password;
+    //     delete ret.createdAt;
+    //     delete ret.updatedAt;
+    //     delete ret.googleId;
+    //     return ret;
+    //   },
+    // },
 
     timestamps: true,
   }

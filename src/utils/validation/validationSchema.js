@@ -19,8 +19,9 @@ const schemas = {
     rating: Joi.number().min(1).max(5).integer(),
   }),
   vineyardSchema: Joi.object().keys({
-    name: Joi.string().required(100),
+    name: Joi.string(),
     address: Joi.object(),
+    phone: Joi.string(),
     description: Joi.string(),
     bio: Joi.string(),
     region: Joi.string(),

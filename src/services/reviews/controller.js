@@ -113,7 +113,7 @@ const likeReviewController = async (req, res, next) => {
       { runValidators: true, new: true }
     );
     const likedReview = await ReviewModel.findByIdAndUpdate(reviewId, {
-      $addToSet: { likes: req.user.username },
+      $addToSet: { likes: req.user._id },
     });
     res.status(200).send({ reviewId });
   } catch (error) {

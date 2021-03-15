@@ -52,6 +52,17 @@ const getAllVineyardsController = async (req, res, next) => {
   }
 };
 
+const getOneVineyardController = async (req, res, next) => {
+  const { vineyardId } = req.params;
+  try {
+    const vineyard = await VineyardModel.findById(vineyardId);
+    res.status(200).json({ vineyard });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 const photoVineyardController = async (req, res, next) => {
   const { vineyardId } = req.params;
   if (!(await VineyardModel.findById(vineyardId)))
@@ -82,16 +93,16 @@ const photoVineyardController = async (req, res, next) => {
 };
 
 const addVineyardController = async (req, res, next) => {
-  const imagesUris = [];
-  if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
-  if (req.files) {
-    const files = req.files;
-    files.map(file => imagesUris.push(file.path));
-  }
-  if (req.file && req.file.path) {
-    // if only one image uploaded
-    imagesUris = req.file.path;
-  }
+  // const imagesUris = [];
+  // if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+  // if (req.files) {
+  //   const files = req.files;
+  //   files.map(file => imagesUris.push(file.path));
+  // }
+  // if (req.file && req.file.path) {
+  //   // if only one image uploaded
+  //   imagesUris = req.file.path;
+  // }
   const {
     addressLine1,
     addressLine2,
@@ -101,13 +112,14 @@ const addVineyardController = async (req, res, next) => {
     country,
   } = req.body.address;
   try {
-    const address = `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
-    const addressDetails = await getAddressDetails(address);
+    const fullAddress = `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
+    const addressDetails = await getAddressDetails(fullAddress);
     const details = addressDetails.data[0];
     const newVineyard = new VineyardModel({
       ...req.body,
-      address: { details, address },
-      images: imagesUris,
+      fullAddress,
+      details,
+      // images: imagesUris,
     });
     const { _id } = await newVineyard.save();
     res.status(200).json({ _id });
@@ -122,34 +134,18 @@ const editVineyardController = async (req, res, next) => {
     const { vineyardId } = req.params;
     if (!(await VineyardModel.findById(vineyardId)))
       throw new ApiError(404, `Vineyard not found`);
-    const {
-      addressLine1,
-      addressLine2,
-      locality,
-      region,
-      postal_code,
-      country,
-    } = req.body.address;
-    const address = `${addressLine1}, ${addressLine2}, ${locality}, ${region} ${postal_code} ${country}`;
-    const addressDetails = await getAddressDetails(address);
-    const details = addressDetails.data[0];
-
-    const editedVineyard = {
-      ...req.body,
-      address: { details, address },
-    };
-    console.log("editedVineyard", editedVineyard);
-    const vineyardToEdit = await VineyardModel.findByIdAndUpdate(
-      vineyardId,
-      editedVineyard,
+    if (!req.user._id) throw new ApiError(401, "You are unauthorized.");
+    const updated = await VineyardModel.findOneAndUpdate(
+      { _id: vineyardId },
+      req.body,
       { runValidators: true }
     );
-    if (vineyardToEdit) {
+    if (updated) {
       res.status(200).json({
-        edited: editedVineyard._id,
-        updatedAt: vineyardToEdit.updatedAt,
+        edited: vineyardId,
+        updatedAt: updated.updatedAt,
       });
-    } else throw new ApiError(401, "You are unauthorized.");
+    }
   } catch (error) {
     console.log(error);
     next(error);
@@ -201,13 +197,13 @@ const unlikeVineyardController = async (req, res, next) => {
       throw new ApiError(404, `Vineyard not found`);
     const user = await UserModel.findByIdAndUpdate(
       userId,
-      { $pull: { likedPosts: vineyardId } },
+      { $pull: { likedVineyards: vineyardId } },
       { runValidators: true, new: true }
     );
     const unlikedVineyard = await VineyardModel.findByIdAndUpdate(vineyardId, {
       $pull: { likes: userId },
     });
-    res.status(200).json({ vineyardId });
+    res.status(200).json({ user });
   } catch (error) {
     console.log(error);
     next(error);
@@ -264,9 +260,10 @@ const searchVineyardResultsController = async (req, res, next) => {
 
 module.exports = {
   getAllVineyardsController,
+  getOneVineyardController,
   getAuthUserSavedVineyardsController,
   addVineyardController,
-  // photoVineyardController,
+  photoVineyardController,
   editVineyardController,
   deleteVineyardController,
   likeVineyardController,
