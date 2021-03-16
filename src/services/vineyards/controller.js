@@ -268,7 +268,6 @@ module.exports = {
   deleteVineyardController,
   likeVineyardController,
   unlikeVineyardController,
-  // visitedVineyardController,
   searchVineyardCityController,
   searchVineyardResultsController,
 };
