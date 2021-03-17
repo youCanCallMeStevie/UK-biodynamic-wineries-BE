@@ -2,13 +2,8 @@
 const express = require("express");
 const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
-// const NodeGeocoder = require('node-geocoder');
-// let options = {
-//   provider: "openstreetmap",
-// };
-// let geocoder = NodeGeocoder(options);
-const haversine = require("haversine-distance");
 const moment = require("moment");
+const haversine = require("haversine-distance");
 const { getAddressDetails } = require("../../utils/postionStack");
 
 //Models
@@ -210,54 +205,50 @@ const unlikeVineyardController = async (req, res, next) => {
   }
 };
 
-const searchVineyardCityController = async (req, res, next) => {
-  try {
-    const result = await geocoder.geocode(req.query.city);
-    const lat = result[0].latitude;
-    const long = result[0].longitude;
-    const cords1 = [long, lat];
-    let results = await VineyardModel.find();
-    results = await results.filter(result => result.address);
-    results = results.filter(
-      loc =>
-        haversine(cords1, [loc.address[0].longitude, loc.address[0].latitude]) <
-        40000
-    );
-    res.status(200).json({ results });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
-
-const searchVineyardResultsController = async (req, res, next) => {
-  const { city } = req.query;
+const searchVineyardsController = async (req, res, next) => {
   try {
     const vineyards = await VineyardModel.find();
-    let filterList = listings;
-
-    if (city) {
-      const coord = await geocoder.geocode(city);
-      const lat = coord[0].latitude;
-      const long = coord[0].longitude;
-      const cords1 = [long, lat];
-      filterList = await vineyards.filter(result => result.address);
-      filterList = filterList.filter(
-        loc =>
-          haversine(cords1, [
-            loc.address[0].longitude,
-            loc.address[0].latitude,
-          ]) < 40000
+    let filteredList = vineyards
+    if (req.query.city) {
+      const citySearch = req.query.city.toLowerCase();
+      console.log("citySearch", citySearch);
+      filteredList = await vineyards.filter(vineyard =>
+        vineyard.region.toLowerCase().includes(citySearch)
       );
     }
-    console.log("filterList", filterList);
-    res.status(200).json({ filterList });
+    if (req.query.grapes) {
+      const grapeSearch = req.query.grapes;
+      console.log("grapeSearch", grapeSearch);
+
+      filteredList = await vineyards.filter(vineyard =>
+        vineyard.grapes.includes(grapeSearch)
+      );
+    }
+    console.log("filteredList", filteredList)
+    res.status(200).json({ filteredList });
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
+
+      //     if (city) {
+      //       const coord = await geocoder.geocode(city);
+      //       const lat = coord[0].latitude;
+      //       const long = coord[0].longitude;
+      //       const cords1 = [long, lat];
+      //       filterList = await vineyards.filter(result => result.address);
+      //       filterList = filterList.filter(
+      //         loc =>
+      //           haversine(cords1, [
+      //             loc.address[0].longitude,
+      //             loc.address[0].latitude,
+      //           ]) < 40000
+      //       );
+      //     }
+      //     console.log("filterList", filterList);
+      //     res.status(200).json({ filterList });
 module.exports = {
   getAllVineyardsController,
   getOneVineyardController,
@@ -268,6 +259,5 @@ module.exports = {
   deleteVineyardController,
   likeVineyardController,
   unlikeVineyardController,
-  searchVineyardCityController,
-  searchVineyardResultsController,
+  searchVineyardsController,
 };

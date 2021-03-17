@@ -20,9 +20,8 @@ const {
     deleteVineyardController,
     likeVineyardController,
     unlikeVineyardController,
-    searchVineyardCityController,
+    searchVineyardsController,
     photoVineyardController,
-    // searchVineyardResultsController
 } = require("./controller.js");
 
 //imported routes
@@ -39,7 +38,7 @@ vineyardRoutes.get("/", getAllVineyardsController);
 vineyardRoutes.get("/:vineyardId", getOneVineyardController);
 
 //search vineyards on database
-vineyardRoutes.get("/search/city", searchVineyardCityController);
+vineyardRoutes.get("/search/results", searchVineyardsController);
 
 
 //add vineyard, according to the schema

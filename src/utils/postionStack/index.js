@@ -22,6 +22,3 @@ const getAddressDetails = async (fullAddress) => {
   module.exports = {getAddressDetails}
 
   
-   
-   
-  
