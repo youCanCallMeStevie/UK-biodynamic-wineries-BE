@@ -4,8 +4,12 @@ const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
 const moment = require("moment");
 const haversine = require("haversine-distance");
-const { getAddressDetails } = require("../../utils/postionStack");
-
+const { getAddressDetails, getCoords } = require("../../utils/postionStack");
+const {
+  MoonPhase,
+  SearchMoonQuarter,
+  NextMoonQuarter,
+} = require("astronomy-engine");
 //Models
 const VineyardModel = require("../vineyards/schema");
 const UserModel = require("../users/schema");
@@ -13,6 +17,9 @@ const ReviewModel = require("../reviews/schema");
 
 //query to mongo
 // const q2m = require("query-to-mongo");
+
+// Moon Api
+const getMoonInfo = require("../../utils/biodynamicApi");
 
 //Error Handling
 const ApiError = require("../../utils/ApiError");
@@ -206,49 +213,49 @@ const unlikeVineyardController = async (req, res, next) => {
 };
 
 const searchVineyardsController = async (req, res, next) => {
+  const { city, grapes } = req.query;
   try {
     const vineyards = await VineyardModel.find();
-    let filteredList = vineyards
-    if (req.query.city) {
-      const citySearch = req.query.city.toLowerCase();
+    let filteredList = vineyards;
+    if (city) {
+      const citySearch = city.toLowerCase();
       console.log("citySearch", citySearch);
-      filteredList = await vineyards.filter(vineyard =>
+      const coord = await getCoords(citySearch);
+      //       filterList = await vineyards.filter(
+      //         vineyard =>
+      //           haversine(cords1, [
+      //             vineyard.details.longitude,
+      //             vineyard.details.latitude,
+      //           ]) < 40000
+      //       );
+      //     }
+      filteredList = await VineyardModel.filter(vineyard =>
         vineyard.region.toLowerCase().includes(citySearch)
       );
     }
-    if (req.query.grapes) {
-      const grapeSearch = req.query.grapes;
-      console.log("grapeSearch", grapeSearch);
-
+    if (grapes) {
+      console.log("grapes", grapes);
       filteredList = await vineyards.filter(vineyard =>
-        vineyard.grapes.includes(grapeSearch)
+        vineyard.grapes.includes(grapes)
       );
     }
-    console.log("filteredList", filteredList)
-    res.status(200).json({ filteredList });
+    if (!req.query.date) {
+      const todaysDate = new Date();
+      const date = parseFloat(moment(todaysDate).format("YYYY-MM-DD"));
+      console.log("searchVineyardsController date", date);
+      let moonInfo = await getMoonInfo(date);
+    } else {
+      const date =
+        req.query.date && parseFloat(moment(req.query.date).format("YYYY-MM-DD"));
+      let moonInfo = await getMoonInfo(date);
+    }
+    res.status(200).json({ results: filteredList });
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
-
-      //     if (city) {
-      //       const coord = await geocoder.geocode(city);
-      //       const lat = coord[0].latitude;
-      //       const long = coord[0].longitude;
-      //       const cords1 = [long, lat];
-      //       filterList = await vineyards.filter(result => result.address);
-      //       filterList = filterList.filter(
-      //         loc =>
-      //           haversine(cords1, [
-      //             loc.address[0].longitude,
-      //             loc.address[0].latitude,
-      //           ]) < 40000
-      //       );
-      //     }
-      //     console.log("filterList", filterList);
-      //     res.status(200).json({ filterList });
 module.exports = {
   getAllVineyardsController,
   getOneVineyardController,
