@@ -1,39 +1,8 @@
-// const MoonCalc = require("mooncalc");
+//Initial set-up
 
-// const getMoonZodiac = async date => {
-//   console.log("getMoonZodiac date", date);
-//   try {
-//     const res = await MoonCalc.datasForDay(`${date}`);
-//     console.log("res", res)
-//     return res;
-//   } catch (error) {
-//     console.log(error);
-//     return null;
-//   }
-// };
-
-//   Date.prototype.addDays = function(days) {
-//     const date = new Date(this.valueOf());
-//     date.setDate(date.getDate() + days);
-//     return date;
-// }
-
-// let date = new Date('09/31/2022'); // note - this has to be in (wrong) US time format
-
-// console.log(date.addDays(5).toLocaleDateString());
-
-// const userDate = new Date('09/31/2022');
-// const phaseDate = new Date('09/20/2022');
-
-// console.log(Math.round((userDate-phaseDate)/(1000*60*60*24))) // this is 11 so 11 days since the phase started
 const axios = require("axios");
-// const egm96 = require("earthgravitymodel1996");
-const { getAltitude, init } = require("sun-horizon");
-
-const ApiError = require("../ApiError");
 const moment = require("moment");
-const apiUrl = "https://ipinfo.io/json";
-
+const { getAltitude, init } = require("sun-horizon");
 const {
   MoonPhase,
   Equator,
@@ -41,9 +10,13 @@ const {
   NextMoonQuarter,
   Observer,
 } = require("astronomy-engine");
+// SearchMoonQuarter 0 = new moon, 1 = first quarter, 2 = full moon, 3 = third quarter.
 
-//london observer= (51, 0, 11) long, lat, sea level in meters
-// 0 = new moon, 1 = first quarter, 2 = full moon, 3 = third quarter.
+//Error Handling
+const ApiError = require("../ApiError");
+
+const apiUrl = "https://ipinfo.io/json";
+
 const defaultGeo = {
   ip: "82.41.109.4",
   hostname: "cpc85194-haye23-2-0-cust3.17-4.cable.virginm.net",
@@ -55,16 +28,19 @@ const defaultGeo = {
   postal: "EC1A",
   timezone: "Europe/London",
   readme: "https://ipinfo.io/missingauth",
-  height: 11,
+  height: 24.392000000009254,
 };
 
-const getGeoData = async () => {
+const getUserGeoData = async () => {
   try {
     const data = await axios.get(apiUrl);
     let geoData = await data.data;
-    if (!geoData) 
-      throw new ApiError(404, `No info found for that IP. Will use default info`);
-    
+    if (!geoData)
+      throw new ApiError(
+        404,
+        `No info found for that IP. Will use default info`
+      );
+
     geoData = geoData || defaultGeo;
 
     const [latStr, lonStr] = geoData.loc.split(",");
@@ -96,10 +72,11 @@ const getMoonInfo = async date => {
 
   const perOfMoonCycle = moonLong / 360;
   console.log("perOfMoonCycle", perOfMoonCycle);
-  const geoData = await getGeoData();
-  const latitude = parseFloat(geoData.latitude);
-  const longitude = parseFloat(geoData.longitude);
-  const height = parseFloat(geoData.height);
+  const userGeoData = await getUserGeoData();
+  const latitude = parseFloat(userGeoData.latitude);
+  const longitude = parseFloat(userGeoData.longitude);
+  const height = parseFloat(userGeoData.height);
+ 
   if (
     perOfMoonCycle < 0.033863193308711 ||
     perOfMoonCycle > 0.966136806691289
@@ -124,7 +101,7 @@ const getMoonInfo = async date => {
   } else if (perOfMoonCycle < 0.783863193308711) {
     phase = "Last Quarter";
     trajectory = "descendent";
-  } else if (age < 0.966136806691289) {
+  } else if (perOfMoonCycle < 0.966136806691289) {
     phase = "Waning Crescent";
     trajectory = "descendent";
   }
@@ -156,10 +133,23 @@ const getMoonInfo = async date => {
   } else {
     zodiac = "Pisces";
   }
-  
-  const observer = await new Observer(latitude, longitude, height);
-  console.log("observer", observer);
-  const moonPostion = await Equator("Moon", date, observer, true, true);
+
+  if ((zodiac = "Taurus" || "Virgo" || "Capricorn")) {
+    house = "Earth";
+    bioDay = "Root";
+  } else if ((zodiac = "Pisces" || "Cancer" || "Scorpio")) {
+    house = "Water";
+    bioDay = "Leaf";
+  } else if ((zodiac = "Gemini" || "Libra" || "Aquarius")) {
+    house = "Air, Light";
+    bioDay = "Flower";
+  } else if ((zodiac = "Aries" || "Leo" || "Sagittarius")) {
+    house = "Air, Light";
+    bioDay = "Fruit";
+  }
+  const observerPos = await new Observer(latitude, longitude, height);
+  console.log("observer", observerPos);
+  const moonPostion = await Equator("Moon", date, observerPos, true, true);
   console.log("moonPostion", moonPostion);
   const searchMoon = await SearchMoonQuarter(parseInt(date));
   console.log("searchMoon", searchMoon);
@@ -173,16 +163,16 @@ const getMoonInfo = async date => {
 
   let difference = parseInt(nextMoonDay) - currentDate;
   console.log("difference", difference);
-
-  console.log("trajectory", trajectory);
-  console.log("phase", phase);
-  console.log("zodiac", zodiac);
-
-  return {
+  const bioObject = {
     trajectory,
     moonPhase: phase,
     zodiac,
-    nextNewMoon: difference
+    house,
+    bioDay,
+  };
+  console.log("bioObject", bioObject);
+  return {
+    bioObject,
   };
 };
 
