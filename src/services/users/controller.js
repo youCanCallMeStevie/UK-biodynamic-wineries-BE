@@ -8,8 +8,7 @@ const UserModel = require("./schema");
 //Error Handling
 const ApiError = require("../../utils/ApiError");
 
-
-const registerController = async (req, res, next)=>{
+const registerController = async (req, res, next) => {
   try {
     const newUser = new UserModel(req.body);
     const { _id } = await newUser.save();
@@ -20,7 +19,7 @@ const registerController = async (req, res, next)=>{
   }
 };
 
-const authUserUploadController = async (req, res, next)=>{
+const authUserUploadController = async (req, res, next) => {
   const { _id } = req.user;
   try {
     const image = req.file && req.file.path;
@@ -34,9 +33,23 @@ const authUserUploadController = async (req, res, next)=>{
     console.log(error);
     next(error);
   }
-}
+};
 
-const getAuthUserController = async (req, res, next)=>{
+const getAllUsersController = async (req, res, next) => {
+  try {
+    const users = await UserModel.find().populate({
+      path: "following followers reviewsGiven likedReviews likedVineyards",
+    });
+    console.log(users);
+    if (!users) throw new ApiError(404, "No users found");
+    res.status(200).send({ users });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const getAuthUserController = async (req, res, next) => {
   try {
     const { _id } = req.user;
     console.log("req.user", req.user);
@@ -52,7 +65,7 @@ const getAuthUserController = async (req, res, next)=>{
   }
 };
 
-const editAuthUserController = async (req, res, next)=>{
+const editAuthUserController = async (req, res, next) => {
   const { _id } = req.user;
   const editedUser = await UserModel.findById(_id);
   try {
@@ -79,13 +92,13 @@ const deleteAuthUserController = async (req, res, next) => {
     console.log(error);
     next(error);
   }
-}
+};
 
 module.exports = {
-    registerController,
-    authUserUploadController,
-    getAuthUserController,
-    editAuthUserController,
-    deleteAuthUserController,
-  }
-  
+  registerController,
+  authUserUploadController,
+  getAllUsersController,
+  getAuthUserController,
+  editAuthUserController,
+  deleteAuthUserController,
+};

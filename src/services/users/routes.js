@@ -12,6 +12,7 @@ const upload = require("../../utils/cloudinary/users");
 const {
   registerController,
   authUserUploadController,
+  getAllUsersController,
   getAuthUserController,
   editAuthUserController,
   deleteAuthUserController,
@@ -30,7 +31,9 @@ userRoutes.post(
   authUserUploadController
 );
 
-userRoutes.post("/me", authorizeUser, getAuthUserController);
+userRoutes.get("/", getAllUsersController);
+userRoutes.get("/me", authorizeUser, getAuthUserController);
+
 
 userRoutes.put("/me", authorizeUser, validate(valSchema.userSchema), editAuthUserController);
 
