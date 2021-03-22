@@ -13,6 +13,8 @@ const {
   registerController,
   authUserUploadController,
   getAllUsersController,
+  getUsernameController,
+  searchUserController,
   getAuthUserController,
   editAuthUserController,
   deleteAuthUserController,
@@ -32,12 +34,10 @@ userRoutes.post(
 );
 
 userRoutes.get("/", getAllUsersController);
+userRoutes.get("/:username", getUsernameController);
 userRoutes.get("/me", authorizeUser, getAuthUserController);
-
-
+userRoutes.get("/search", searchUserController);
 userRoutes.put("/me", authorizeUser, validate(valSchema.userSchema), editAuthUserController);
-
-
 userRoutes.delete("/me", authorizeUser, deleteAuthUserController);
 
 module.exports = userRoutes;

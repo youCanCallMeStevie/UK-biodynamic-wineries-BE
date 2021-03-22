@@ -35,6 +35,34 @@ const authUserUploadController = async (req, res, next) => {
   }
 };
 
+const getUsernameController = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const user = await UserModel.findOne({ username }).populate({
+      path: "following followers",
+    });
+    if (!user) throw new ApiError(404, "There is no user with this username ");
+    res.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+
+const searchUserController = async (req, res, next) => {
+  try {
+    const users = await UserModel.find({
+      username: new RegExp(req.query.q, "i"),
+    });
+    if (!users) throw new ApiError(404, "There is users found");
+    res.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 const getAllUsersController = async (req, res, next) => {
   try {
     const users = await UserModel.find().populate({
@@ -57,10 +85,11 @@ const getAuthUserController = async (req, res, next) => {
       path: "following followers",
     });
     console.log(currentUser);
-    if (!currentUser) throw error;
+    if (!currentUser)
+      throw new ApiError(401, "Wrong Credentials. Please login again");
     res.status(200).send({ currentUser });
   } catch (error) {
-    new ApiError(401, "Wrong Credentials. Please login again");
+    console.log(error);
     next(error);
   }
 };
@@ -97,6 +126,8 @@ const deleteAuthUserController = async (req, res, next) => {
 module.exports = {
   registerController,
   authUserUploadController,
+  getUsernameController,
+  searchUserController,
   getAllUsersController,
   getAuthUserController,
   editAuthUserController,
