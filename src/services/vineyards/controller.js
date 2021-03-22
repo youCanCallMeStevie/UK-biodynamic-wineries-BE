@@ -1,12 +1,12 @@
 //Initial set-up
 const express = require("express");
+const mongoose = require("mongoose");
 const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
 const moment = require("moment");
 const haversine = require("haversine-distance");
 const { getAddressDetails, getCoords } = require("../../utils/postionStack");
 const getMoonInfo = require("../../utils/biodynamicApi");
-
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -15,7 +15,6 @@ const ReviewModel = require("../reviews/schema");
 
 //query to mongo
 // const q2m = require("query-to-mongo");
-
 
 //Error Handling
 const ApiError = require("../../utils/ApiError");
@@ -54,6 +53,9 @@ const getOneVineyardController = async (req, res, next) => {
   const { vineyardId } = req.params;
   try {
     const vineyard = await VineyardModel.findById(vineyardId);
+    const todaysDate = new Date();
+    const date = parseFloat(moment(todaysDate).format("YYYY-MM-DD"));
+    let moonInfo = await getMoonInfo(date);
     res.status(200).json({ vineyard });
   } catch (error) {
     console.log(error);
@@ -217,32 +219,24 @@ const searchVineyardsController = async (req, res, next) => {
       const citySearch = city.toLowerCase();
       console.log("citySearch", citySearch);
       const coord = await getCoords(citySearch);
-      //       filterList = await vineyards.filter(
-      //         vineyard =>
-      //           haversine(cords1, [
-      //             vineyard.details.longitude,
-      //             vineyard.details.latitude,
-      //           ]) < 40000
-      //       );
-      //     }
-      filteredList = await VineyardModel.filter(vineyard =>
+      filteredList = vineyards.filter(vineyard =>
         vineyard.region.toLowerCase().includes(citySearch)
       );
     }
     if (grapes) {
       console.log("grapes", grapes);
-      filteredList = await vineyards.filter(vineyard =>
+      filteredList = vineyards.filter(vineyard =>
         vineyard.grapes.includes(grapes)
       );
     }
     if (!req.query.date) {
       const todaysDate = new Date();
       const date = parseFloat(moment(todaysDate).format("YYYY-MM-DD"));
-      console.log("searchVineyardsController date", date);
       let moonInfo = await getMoonInfo(date);
     } else {
       const date =
-        req.query.date && parseFloat(moment(req.query.date).format("YYYY-MM-DD"));
+        req.query.date &&
+        parseFloat(moment(req.query.date).format("YYYY-MM-DD"));
       let moonInfo = await getMoonInfo(date);
     }
     res.status(200).json({ results: filteredList });

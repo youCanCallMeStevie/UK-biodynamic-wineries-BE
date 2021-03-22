@@ -1,5 +1,6 @@
 //Initial set-up
-
+const express = require("express");
+const mongoose = require("mongoose");
 const axios = require("axios");
 const moment = require("moment");
 const { getAltitude, init } = require("sun-horizon");
@@ -12,10 +13,32 @@ const {
 } = require("astronomy-engine");
 // SearchMoonQuarter 0 = new moon, 1 = first quarter, 2 = full moon, 3 = third quarter.
 
+//Models
+const VineyardModel = require("../../services/vineyards/schema");
+
 //Error Handling
 const ApiError = require("../ApiError");
 
 const apiUrl = "https://ipinfo.io/json";
+
+// const vineyardGeoDetails = async (req, res, next) => {
+//   try {
+//     console.log("req", req)
+//     const vineyard = await VineyardModel.find(req.params.vineyardId);
+//     const vineyardGeo = {
+//       city: `${vinyard.address.city}`,
+//       region: `${vinyard.address.region}`,
+//       country: `${vinyard.address.country}`,
+//       latitude: `${vinyard.details.latitude}`,
+//       longitude: `${vinyard.details.longitude}`,
+//     };
+//     if (vineyardGeo) return vineyardGeo;
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// };
+
 
 const defaultGeo = {
   ip: "82.41.109.4",
@@ -40,18 +63,16 @@ const getUserGeoData = async () => {
         404,
         `No info found for that IP. Will use default info`
       );
-
     geoData = geoData || defaultGeo;
 
-    const [latStr, lonStr] = geoData.loc.split(",");
-    const latitude = parseFloat(latStr);
-    const longitude = parseFloat(lonStr);
-
-    init();
-    const origin = {
-      lat: latitude,
-      lng: longitude,
-    };
+      const [latStr, lonStr] = geoData.loc.split(",");
+      const latitude = parseFloat(latStr);
+      const longitude = parseFloat(lonStr);
+      init();
+      const origin = {
+        lat: latitude,
+        lng: longitude,
+      };
     const altitude = await getAltitude(origin); // in meter
     console.log("altitude", altitude);
     Object.assign(geoData, {
@@ -76,7 +97,7 @@ const getMoonInfo = async date => {
   const latitude = parseFloat(userGeoData.latitude);
   const longitude = parseFloat(userGeoData.longitude);
   const height = parseFloat(userGeoData.height);
- 
+
   if (
     perOfMoonCycle < 0.033863193308711 ||
     perOfMoonCycle > 0.966136806691289
@@ -162,6 +183,8 @@ const getMoonInfo = async date => {
   let currentDate = moment(new Date()).format("DD");
 
   let difference = parseInt(nextMoonDay) - currentDate;
+  //difference leading up to the fruit day, suggested visit day
+
   console.log("difference", difference);
   const bioObject = {
     trajectory,
@@ -169,6 +192,7 @@ const getMoonInfo = async date => {
     zodiac,
     house,
     bioDay,
+    //nextFruitday
   };
   console.log("bioObject", bioObject);
   return {
