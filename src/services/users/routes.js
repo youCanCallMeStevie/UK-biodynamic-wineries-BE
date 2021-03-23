@@ -34,9 +34,9 @@ userRoutes.post(
 );
 
 userRoutes.get("/", getAllUsersController);
-userRoutes.get("/:username", getUsernameController);
 userRoutes.get("/me", authorizeUser, getAuthUserController);
 userRoutes.get("/search", searchUserController);
+userRoutes.get("/:username", getUsernameController);
 userRoutes.put("/me", authorizeUser, validate(valSchema.userSchema), editAuthUserController);
 userRoutes.delete("/me", authorizeUser, deleteAuthUserController);
 

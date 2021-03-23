@@ -43,9 +43,8 @@ const getVineyardReviewsController = async (req, res, next) => {
           path: "reviews",
         })
         .sort({ createdAt: -1 });
-      console.log("vineyard reviews controller", vineyard);
-      if (vinyard) {
-        res.status(200).send(vineyard);
+      if (vineyard) {
+        res.status(200).send(vineyard.reviews);
       } else res.status(200).json({ message: "no reviews for this vineyard" });
     } else throw new ApiError(404, "no vineyard found");
   } catch (error) {
