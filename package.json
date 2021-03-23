@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/youCanCallMeStevie/UK-biodynamic-wineries-BE#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.2",
     "astronomy-engine": "^2.0.1",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",

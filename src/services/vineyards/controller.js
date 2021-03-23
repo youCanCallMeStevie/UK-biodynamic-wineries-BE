@@ -5,8 +5,13 @@ const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
 const moment = require("moment");
 const haversine = require("haversine-distance");
-const { getAddressDetails, getCoords } = require("../../utils/postionStack");
+const sgMail = require("@sendgrid/mail");
+const { MakeTime } = require("astronomy-engine");
+
+//Imports
 const getMoonInfo = require("../../utils/biodynamicApi");
+const { getAddressDetails, getCoords } = require("../../utils/postionStack");
+// const emailTemplate = require("../../utils/email/index.html")
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -54,9 +59,9 @@ const getOneVineyardController = async (req, res, next) => {
   try {
     const vineyard = await VineyardModel.findById(vineyardId);
     const todaysDate = new Date();
-    const date = parseFloat(moment(todaysDate).format("YYYY-MM-DD"));
-    let moonInfo = await getMoonInfo(date);
-    res.status(200).json({ vineyard });
+    const date = await MakeTime(todaysDate);
+    const moonInfo = await getMoonInfo(date);
+    res.status(200).json({ vineyard, moonInfo });
   } catch (error) {
     console.log(error);
     next(error);
@@ -179,10 +184,31 @@ const likeVineyardController = async (req, res, next) => {
       { $addToSet: { likedVineyards: vineyardId } },
       { runValidators: true, new: true }
     );
+
     const likedVineyard = await VineyardModel.findByIdAndUpdate(vineyardId, {
-      $addToSet: { likes: req.user._id },
+      $addToSet: { likes: userId },
     });
     res.status(200).json({ vineyardId });
+
+    if (user.publicProfile === true) {
+      const vineyard = await VineyardModel.findById(vineyardId);
+      if (!vineyard.prevEmailed.includes(userId)) {
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const msg = {
+          to: "flanagan.stephanie@gmail.com",
+          from: `${user.email}`,
+          subject: `${user.name} just followed ${likedVineyard.name}`,
+          text: "strive school",
+          html: "emailTemplate()",
+        };
+        const emailed = await VineyardModel.findByIdAndUpdate(
+          vineyardId,
+          { $addToSet: { prevEmailed: userId } },
+          { runValidators: true, new: true }
+        );
+        await sgMail.send(msg);
+      }
+    }
   } catch (error) {
     console.log(error);
     next(error);
@@ -231,12 +257,14 @@ const searchVineyardsController = async (req, res, next) => {
     }
     if (!req.query.date) {
       const todaysDate = new Date();
-      const date = parseFloat(moment(todaysDate).format("YYYY-MM-DD"));
+      const date = await MakeTime(todaysDate);
+      // const date = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      console.log("date from controller", date);
       let moonInfo = await getMoonInfo(date);
     } else {
-      const date =
-        req.query.date &&
-        parseFloat(moment(req.query.date).format("YYYY-MM-DD"));
+      const searchDate = new Date(req.query.date);
+      const date = await MakeTime(searchDate);
+      console.log("date from search with date controller", date);
       let moonInfo = await getMoonInfo(date);
     }
     res.status(200).json({ results: filteredList });

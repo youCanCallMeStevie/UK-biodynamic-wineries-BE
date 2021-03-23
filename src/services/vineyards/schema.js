@@ -47,6 +47,7 @@ const VineyardSchema = new mongoose.Schema(
     food: Boolean,
     likes:[{ type: Schema.Types.ObjectId, ref: "users" }],
     reviews: [{ type: Schema.Types.ObjectId, ref: "reviews" }],
+    prevEmailed: [{ type: Schema.Types.ObjectId, ref: "users" }],
   },
   { timestamps: true }
 );
