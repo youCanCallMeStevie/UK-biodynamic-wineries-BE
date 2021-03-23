@@ -127,42 +127,50 @@ const getMoonInfo = async date => {
     trajectory = "descendent";
   }
 
-  if (moonLong < 33.18) {
+  if (moonLong < 6.18) {
     zodiac = "Aries";
-  } else if (moonLong < 51.16) {
+  } else if (moonLong < 36.16) {
     zodiac = "Taurus";
-  } else if (moonLong < 93.44) {
+  } else if (moonLong < 66.44) {
     zodiac = "Gemini";
-  } else if (moonLong < 119.48) {
+  } else if (moonLong < 90) {
     zodiac = "Cancer";
-  } else if (moonLong < 135.3) {
+  } else if (moonLong < 125.3) {
     zodiac = "Leo";
-  } else if (moonLong < 173.34) {
+  } else if (moonLong < 145.5) {
     zodiac = "Virgo";
-  } else if (moonLong < 224.17) {
+  } else if (moonLong < 175) {
     zodiac = "Libra";
-  } else if (moonLong < 242.57) {
+  } else if (moonLong < 210.57) {
     zodiac = "Scorpio";
-  } else if (moonLong < 271.26) {
+  } else if (moonLong < 241.26) {
     zodiac = "Sagittarius";
-  } else if (moonLong < 302.49) {
+  } else if (moonLong < 270.49) {
     zodiac = "Capricorn";
-  } else if (moonLong < 311.72) {
+  } else if (moonLong < 300.72) {
     zodiac = "Aquarius";
-  } else if (moonLong < 348.58) {
+  } else if (moonLong < 336.58) {
     zodiac = "Pisces";
-  }
+  } else zodiac = "Aries"
 
-  if (zodiac == "Taurus" || "Virgo" || "Capricorn") {
+  // switch (zodic) {
+  //   case "Taurus":
+  //   case "Virgo":
+  //   case "Capricorn":
+  //     return
+  //     house = "Earth";
+  //     bioDay = "Root";
+  // }
+  if (zodiac == "Taurus" || zodiac == "Virgo" || zodiac == "Capricorn") {
     house = "Earth";
     bioDay = "Root";
-  } else if (zodiac == "Gemini" || "Libra" || "Aquarius") {
+  } else if (zodiac == "Gemini" || zodiac == "Libra" || zodiac == "Aquarius") {
     house = "Air, Light";
     bioDay = "Flower";
-  } else if (zodiac == "Pisces" || "Cancer" || "Scorpio") {
+  } else if (zodiac == "Pisces" || zodiac == "Cancer" || zodiac == "Scorpio") {
     house = "Water";
     bioDay = "Leaf";
-  } else if (zodiac == "Aries" || "Leo" || "Sagittarius") {
+  } else if (zodiac == "Aries" || zodiac == "Leo" || zodiac == "Sagittarius") {
     house = "Air, Light";
     bioDay = "Fruit";
   }
