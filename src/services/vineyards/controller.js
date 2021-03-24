@@ -11,7 +11,7 @@ const { MakeTime } = require("astronomy-engine");
 //Imports
 const getMoonInfo = require("../../utils/biodynamicApi");
 const { getAddressDetails, getCoords } = require("../../utils/postionStack");
-// const emailTemplate = require("../../utils/email/index.html")
+const newFollower = require("../../utils/email/newFollower.js")
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -199,7 +199,7 @@ const likeVineyardController = async (req, res, next) => {
           from: `${user.email}`,
           subject: `${user.name} just followed ${likedVineyard.name}`,
           text: "strive school",
-          html: "emailTemplate()",
+          html: newFollower(user.name, likedVineyard.name),
         };
         const emailed = await VineyardModel.findByIdAndUpdate(
           vineyardId,

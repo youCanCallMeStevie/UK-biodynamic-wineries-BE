@@ -6,7 +6,7 @@ const {
   verifyAccessToken,
   verifyRefreshToken,
 } = require("../../utils/auth/tokens");
-const { FE_URI } = process.env;
+const { FE_URL } = process.env;
 
 //Model
 const UserModel = require("../users/schema");
@@ -76,7 +76,7 @@ const googleCallBackController = async (req, res, next) => {
     const { tokens } = req.user;
     const cookies = await generateCookies(tokens, res);
     //verify credentials
-    res.redirect(FE_URI);
+    res.redirect(FE_URL);
   } catch (err) {
     next(err);
   }
