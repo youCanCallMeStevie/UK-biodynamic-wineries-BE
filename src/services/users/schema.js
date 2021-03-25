@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema(
     name: { type: String, required: true },
     lastname: { type: String, required: true },
     username: { type: String, required: true },
-    imageUrl: String,
+    imageUrl: {type: String, default:"https://res.cloudinary.com/youcancallmestevie/image/upload/v1616713353/BDusers/moon_avatar_xsg1jn.jpg"},
   
     email: {
       type: String,
