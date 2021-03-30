@@ -165,13 +165,13 @@ const getMoonInfo = async date => {
     house = "Earth";
     bioDay = "Root";
   } else if (zodiac == "Gemini" || zodiac == "Libra" || zodiac == "Aquarius") {
-    house = "Air, Light";
+    house = "Air";
     bioDay = "Flower";
   } else if (zodiac == "Pisces" || zodiac == "Cancer" || zodiac == "Scorpio") {
     house = "Water";
     bioDay = "Leaf";
   } else if (zodiac == "Aries" || zodiac == "Leo" || zodiac == "Sagittarius") {
-    house = "Air, Light";
+    house = "Light & Fire";
     bioDay = "Fruit";
   }
 

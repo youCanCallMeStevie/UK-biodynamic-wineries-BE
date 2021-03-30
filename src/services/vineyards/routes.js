@@ -22,6 +22,7 @@ const {
     unlikeVineyardController,
     searchVineyardsController,
     photoVineyardController,
+    todaysInfo
 } = require("./controller.js");
 
 //imported routes
@@ -30,6 +31,9 @@ vineyardRoutes.use("/reviews", reviewRoutes);
 
 //all liked vineyards on signed in user's list
 vineyardRoutes.get("/me", authorizeUser, getAuthUserSavedVineyardsController);
+
+//get all vineyards on database
+vineyardRoutes.get("/today/mooninfo", todaysInfo);
 
 //get all vineyards on database
 vineyardRoutes.get("/", getAllVineyardsController);

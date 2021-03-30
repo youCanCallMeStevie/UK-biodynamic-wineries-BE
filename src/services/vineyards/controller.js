@@ -274,6 +274,21 @@ const searchVineyardsController = async (req, res, next) => {
   }
 };
 
+const todaysInfo= async (req, res, next)=>{
+  try {
+    const todaysDate = new Date();
+    const date = await MakeTime(todaysDate);
+    // const date = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+    console.log("date from controller", date);
+    let moonInfo = await getMoonInfo(date);
+    res.status(200).json({ moonInfo });
+
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 module.exports = {
   getAllVineyardsController,
   getOneVineyardController,
@@ -285,4 +300,5 @@ module.exports = {
   likeVineyardController,
   unlikeVineyardController,
   searchVineyardsController,
+  todaysInfo
 };

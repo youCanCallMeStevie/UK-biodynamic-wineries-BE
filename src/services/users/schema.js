@@ -7,14 +7,18 @@ const UserSchema = new mongoose.Schema(
     name: { type: String, required: true },
     lastname: { type: String, required: true },
     username: { type: String, required: true },
-    imageUrl: {type: String, default:"https://res.cloudinary.com/youcancallmestevie/image/upload/v1616713353/BDusers/moon_avatar_xsg1jn.jpg"},
-  
+    imageUrl: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/youcancallmestevie/image/upload/v1616713353/BDusers/moon_avatar_xsg1jn.jpg",
+    },
+
     email: {
       type: String,
       required: true,
     },
     bio: {
-      type: String
+      type: String,
     },
     password: {
       type: String,
@@ -22,18 +26,20 @@ const UserSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
-    publicProfile:{
+    publicProfile: {
       type: Boolean,
-      default: true
+      default: true,
     },
-    followers: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
-    following: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
-    reviewsGiven:[{type: mongoose.Schema.Types.ObjectId, ref: "reviews"}],
-    likedReviews:[{type: mongoose.Schema.Types.ObjectId, ref: "reviews"}],
-    likedVineyards:[{type: mongoose.Schema.Types.ObjectId, ref: "vineyards"}],
-    vistedVineyards:[{type: mongoose.Schema.Types.ObjectId, ref: "vineyards"}],
-
-
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    reviewsGiven: [{ type: mongoose.Schema.Types.ObjectId, ref: "reviews" }],
+    likedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "reviews" }],
+    likedVineyards: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "vineyards" },
+    ],
+    vistedVineyards: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "vineyards" },
+    ],
 
     refreshToken: String,
   },
@@ -63,7 +69,6 @@ UserSchema.methods.comparePass = async function (pass) {
     return false;
   }
 };
-
 
 UserSchema.methods.toJSON = function () {
   const user = this;
@@ -95,7 +100,6 @@ UserSchema.methods.toJSON = function () {
 //   }
 //   next();
 // });
-
 
 const UserModel = model("users", UserSchema);
 module.exports = UserModel;
