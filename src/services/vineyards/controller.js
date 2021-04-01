@@ -243,7 +243,6 @@ const searchVineyardsController = async (req, res, next) => {
     let filteredList = vineyards;
     if (city) {
       const citySearch = city.toLowerCase();
-      console.log("citySearch", citySearch);
       const coord = await getCoords(citySearch);
       filteredList = vineyards.filter(vineyard =>
         vineyard.region.toLowerCase().includes(citySearch)
@@ -251,15 +250,17 @@ const searchVineyardsController = async (req, res, next) => {
     }
     if (grapes) {
       console.log("grapes", grapes);
+      const grapesStr = grapes
+      const res = grapesStr.toLowerCase()
+      console.log("res", res);
+
       filteredList = vineyards.filter(vineyard =>
-        vineyard.grapes.includes(grapes)
+        vineyard.grapes.includes(res)
       );
     }
     if (!req.query.date) {
       const todaysDate = new Date();
       const date = await MakeTime(todaysDate);
-      // const date = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-      console.log("date from controller", date);
       let moonInfo = await getMoonInfo(date);
     } else {
       const searchDate = new Date(req.query.date);
@@ -267,7 +268,7 @@ const searchVineyardsController = async (req, res, next) => {
       console.log("date from search with date controller", date);
       let moonInfo = await getMoonInfo(date);
     }
-    res.status(200).json({ results: filteredList });
+    res.status(200).json({ vineyards: filteredList });
   } catch (error) {
     console.log(error);
     next(error);

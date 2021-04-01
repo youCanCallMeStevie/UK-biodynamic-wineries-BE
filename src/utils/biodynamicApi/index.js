@@ -114,7 +114,7 @@ const getMoonInfo = async date => {
     phase = "Waxing Gibbous";
     trajectory = "ascendent";
   } else if (perOfMoonCycle < 0.533863193308711) {
-    phase = "FULL";
+    phase = "Full";
     trajectory = "descendent";
   } else if (perOfMoonCycle < 0.716136806691289) {
     phase = "Waning Gibbous";
@@ -196,13 +196,13 @@ const getMoonInfo = async date => {
   const nextFullMoon = SearchMoonPhase(180, date, 30);
 
   if (bioDay == "Leaf") {
-    nextFruitday = "A Fruit day is less than 2.5 days away";
+    nextFruitDay = "less than 2.5 days away";
   } else if (bioDay == "Flower") {
-    nextFruitday = "A Fruit day is less than 5 days away";
+    nextFruitDay = "less than 5 days away";
   } else if (bioDay == "Root") {
-    nextFruitday = "A Fruit day is less than 7.5 days away";
+    nextFruitDay = "less than 7.5 days away";
   } else if (bioDay == "Fruit") {
-    nextFruitday = null;
+    nextFruitDay = null;
   }
 
   const bioObject = {
@@ -212,7 +212,7 @@ const getMoonInfo = async date => {
     zodiac,
     house,
     bioDay,
-    nextFruitday,
+    nextFruitDay,
     nextFullMoon,
   };
   console.log("bioObject", bioObject);
