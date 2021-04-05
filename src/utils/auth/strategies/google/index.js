@@ -17,10 +17,10 @@ passport.use(
         console.log(profile);
         const { email, given_name, family_name, picture } = profile._json;
         //verify if the user is already registered
-        const user = await User.findOne({ email });
+        const user = await UserModel.findOne({ email });
         if (!user) {
           //register the user
-          const newUser = new User({
+          const newUser = new UserModel({
             name: given_name,
             lastname: family_name,
             imageUrl: picture,
