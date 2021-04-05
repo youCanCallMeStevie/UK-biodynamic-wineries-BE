@@ -59,9 +59,9 @@ const getOneVineyardController = async (req, res, next) => {
   try {
     const vineyard = await VineyardModel.findById(vineyardId);
     const todaysDate = new Date();
-    const date = await MakeTime(todaysDate);
-    const moonInfo = await getMoonInfo(date);
-    res.status(200).json({ vineyard, moonInfo });
+    // const date = await MakeTime(todaysDate);
+    // const moonInfo = await getMoonInfo(date);
+    res.status(200).json({ vineyards: vineyard });
   } catch (error) {
     console.log(error);
     next(error);
