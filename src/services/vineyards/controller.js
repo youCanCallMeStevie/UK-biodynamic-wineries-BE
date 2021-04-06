@@ -200,7 +200,7 @@ const likeVineyardController = async (req, res, next) => {
           from: `${user.email}`,
           subject: `${user.name} just followed ${likedVineyard.name}`,
           text: "strive school",
-          html: newFollower(user.name, likedVineyard.name),
+          // html: newFollower(user.name, likedVineyard.name),
         };
         const emailed = await VineyardModel.findByIdAndUpdate(
           vineyardId,

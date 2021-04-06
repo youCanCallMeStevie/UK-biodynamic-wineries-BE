@@ -18,11 +18,9 @@ const loginController = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await UserModel.findOne({ username });
-    console.log(user);
     if (!user) throw error;
     if (user) {
       const isValid = user.comparePass(password);
-      console.log(isValid);
       //if it's valid, generate jwt
       const tokens = await generateTokens(user);
       //send cookies

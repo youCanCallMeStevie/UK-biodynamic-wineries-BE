@@ -82,7 +82,7 @@ const getAuthUserController = async (req, res, next) => {
     const { _id } = req.user;
     console.log("req.user", req.user);
     const currentUser = await UserModel.findById(_id).populate({
-      path: "following followers",
+      path: "following followers likedVineyards",
     });
     console.log(currentUser);
     if (!currentUser)
