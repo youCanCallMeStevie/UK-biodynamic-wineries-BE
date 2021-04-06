@@ -7,7 +7,7 @@ const ReviewSchema = new Schema(
       required: true,
     },
     rating: Number,
-    userId: { type: String },
+    userId: {  type: mongoose.Schema.Types.ObjectId, ref: "users" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
   },
   { timestamps: true }

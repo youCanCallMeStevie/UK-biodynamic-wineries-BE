@@ -11,7 +11,7 @@ const { MakeTime } = require("astronomy-engine");
 //Imports
 const getMoonInfo = require("../../utils/biodynamicApi");
 const { getAddressDetails, getCoords } = require("../../utils/postionStack");
-const newFollower = require("../../utils/email/newFollower.js")
+const newFollower = require("../../utils/email/newFollower.js");
 
 //Models
 const VineyardModel = require("../vineyards/schema");
@@ -57,9 +57,12 @@ const getAllVineyardsController = async (req, res, next) => {
 const getOneVineyardController = async (req, res, next) => {
   const { vineyardId } = req.params;
   try {
-    const vineyard = await VineyardModel.find({_id: vineyardId});
+    const vineyard = await VineyardModel.find({ _id: vineyardId }).populate({
+      path: "reviews ", populate: { path: 'userId' }
+    });
+
     res.status(200).json({ vineyards: vineyard });
-    console.log("vineyard", vineyard)
+    console.log("vineyard", vineyard);
   } catch (error) {
     console.log(error);
     next(error);
@@ -248,8 +251,8 @@ const searchVineyardsController = async (req, res, next) => {
     }
     if (grapes) {
       console.log("grapes", grapes);
-      const grapesStr = grapes
-      const res = grapesStr.toLowerCase()
+      const grapesStr = grapes;
+      const res = grapesStr.toLowerCase();
       console.log("res", res);
 
       filteredList = vineyards.filter(vineyard =>
@@ -273,7 +276,7 @@ const searchVineyardsController = async (req, res, next) => {
   }
 };
 
-const todaysInfo= async (req, res, next)=>{
+const todaysInfo = async (req, res, next) => {
   try {
     const todaysDate = new Date();
     const date = await MakeTime(todaysDate);
@@ -281,12 +284,11 @@ const todaysInfo= async (req, res, next)=>{
     console.log("date from controller", date);
     let moonInfo = await getMoonInfo(date);
     res.status(200).json({ moonInfo });
-
   } catch (error) {
     console.log(error);
     next(error);
   }
-}
+};
 
 module.exports = {
   getAllVineyardsController,
@@ -299,5 +301,5 @@ module.exports = {
   likeVineyardController,
   unlikeVineyardController,
   searchVineyardsController,
-  todaysInfo
+  todaysInfo,
 };
