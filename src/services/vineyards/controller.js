@@ -58,7 +58,8 @@ const getOneVineyardController = async (req, res, next) => {
   const { vineyardId } = req.params;
   try {
     const vineyard = await VineyardModel.find({ _id: vineyardId }).populate({
-      path: "reviews ", populate: { path: 'userId' }
+      path: "reviews ",
+      populate: { path: "userId" },
     });
 
     res.status(200).json({ vineyards: vineyard });
@@ -248,17 +249,28 @@ const searchVineyardsController = async (req, res, next) => {
       filteredList = vineyards.filter(vineyard =>
         vineyard.region.toLowerCase().includes(citySearch)
       );
+      console.log("filteredList", filteredList);
     }
     if (grapes) {
       console.log("grapes", grapes);
       const grapesStr = grapes;
       const res = grapesStr.toLowerCase();
       console.log("res", res);
-
-      filteredList = vineyards.filter(vineyard =>
-        vineyard.grapes.includes(res)
-      );
+      const nRegex = new RegExp(res, "i");
+      const regex = await VineyardModel.find({ grapes: { $in: [nRegex] } });
+      console.log("regex", regex);
+      // filteredList= vineyards.filter(vineyard => vineyard?._id === regex._id);
+      console.log("filteredList2", filteredList);
     }
+    res.status(200).json({ vineyards: filteredList });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const searchDateController = async (req, res, next) => {
+  try {
     if (!req.query.date) {
       const todaysDate = new Date();
       const date = await MakeTime(todaysDate);
@@ -268,8 +280,9 @@ const searchVineyardsController = async (req, res, next) => {
       const date = await MakeTime(searchDate);
       console.log("date from search with date controller", date);
       let moonInfo = await getMoonInfo(date);
+      console.log("moonInfo", moonInfo);
+      res.status(200).json({ moonInfo });
     }
-    res.status(200).json({ vineyards: filteredList });
   } catch (error) {
     console.log(error);
     next(error);
@@ -301,5 +314,6 @@ module.exports = {
   likeVineyardController,
   unlikeVineyardController,
   searchVineyardsController,
+  searchDateController,
   todaysInfo,
 };

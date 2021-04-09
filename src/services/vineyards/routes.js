@@ -21,6 +21,7 @@ const {
     likeVineyardController,
     unlikeVineyardController,
     searchVineyardsController,
+    searchDateController,
     photoVineyardController,
     todaysInfo
 } = require("./controller.js");
@@ -44,6 +45,8 @@ vineyardRoutes.get("/:vineyardId", getOneVineyardController);
 //search vineyards on database
 vineyardRoutes.get("/search/results", searchVineyardsController);
 
+//get only the future bioDay
+vineyardRoutes.get("/search/results/dates", searchDateController);
 
 //add vineyard, according to the schema
 vineyardRoutes.post("/", authorizeUser, validate(valSchema.vineyardSchema), addVineyardController);
