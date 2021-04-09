@@ -7,6 +7,7 @@ const moment = require("moment");
 const haversine = require("haversine-distance");
 const sgMail = require("@sendgrid/mail");
 const { MakeTime } = require("astronomy-engine");
+const q2m = require("query-to-mongo");
 
 //Imports
 const getMoonInfo = require("../../utils/biodynamicApi");
@@ -240,28 +241,24 @@ const unlikeVineyardController = async (req, res, next) => {
 
 const searchVineyardsController = async (req, res, next) => {
   const { city, grapes } = req.query;
+  const grapesStr = grapes;
+  const result = grapesStr.toLowerCase();
+  const nRegex = new RegExp(result, "i");
   try {
-    const vineyards = await VineyardModel.find();
-    let filteredList = vineyards;
-    if (city) {
-      const citySearch = city.toLowerCase();
-      const coord = await getCoords(citySearch);
-      filteredList = vineyards.filter(vineyard =>
-        vineyard.region.toLowerCase().includes(citySearch)
-      );
-      console.log("filteredList", filteredList);
-    }
-    if (grapes) {
-      console.log("grapes", grapes);
-      const grapesStr = grapes;
-      const res = grapesStr.toLowerCase();
-      console.log("res", res);
-      const nRegex = new RegExp(res, "i");
-      const regex = await VineyardModel.find({ grapes: { $in: [nRegex] } });
-      console.log("regex", regex);
-      // filteredList= vineyards.filter(vineyard => vineyard?._id === regex._id);
-      console.log("filteredList2", filteredList);
-    }
+    const query =
+      city && grapes
+        ? {
+            $and: [
+              { region: { $regex: city, $options: "i" } },
+              { grapes: { $in: [nRegex] } },
+            ],
+          }
+        : city
+        ? { region: { $regex: city, $options: "i" } }
+        : grapes
+        ? { grapes: { $in: [nRegex] } }
+        : {};
+    const filteredList = await VineyardModel.find(query);
     res.status(200).json({ vineyards: filteredList });
   } catch (error) {
     console.log(error);

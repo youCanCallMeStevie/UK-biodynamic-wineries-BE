@@ -35,7 +35,7 @@ server.use("/api", apiRoutes);
 server.use(badRequestHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
-console.log(listEndPoints(server));
+// console.log(listEndPoints(server));
 
 mongoose
   .connect(MONGO_CONNECTION, {
