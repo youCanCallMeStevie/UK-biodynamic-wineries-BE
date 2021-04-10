@@ -50,11 +50,3 @@ mongoose
       })
     .catch((err) => console.log(err));
     });
-  // .then(() =>
-  //   server.listen(PORT || 4000)
-  //   .catch((err) => console.log(err))
-  // );
-
-// httpServer.listen(PORT, () => {
-//   console.log("server connected at port ", PORT);
-// })
