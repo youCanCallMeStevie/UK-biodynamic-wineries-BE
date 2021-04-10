@@ -44,8 +44,8 @@ mongoose
   })
   .then(
     server.listen(PORT, () => {
-      //   if (server.get("env") === "production")
-      // console.log("Server is running on CLOUD on Port: ", PORT);
+        if (server.get("env") === "production")
+      console.log("Server is running on CLOUD on Port: ", PORT);
       console.log("Server is running LOCALLY on Port http:localhost:", PORT);
     })
   )
