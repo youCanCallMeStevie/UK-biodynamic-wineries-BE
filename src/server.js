@@ -42,11 +42,13 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(
-    server.listen(PORT, () => {
-        if (server.get("env") === "production")
-      console.log("Server is running on CLOUD on Port: ", PORT);
-      console.log("Server is running LOCALLY on Port http:localhost:", PORT);
-    })
-  )
-  .catch(err => console.log(err));
+  .then(() => {
+    
+    // server.listen(PORT, () => {
+    //     if (server.get("env") === "production")
+    //   console.log("Server is running on CLOUD on Port: ", PORT);
+    //   console.log("Server is running LOCALLY on Port http:localhost:", PORT);
+    // })
+    httpServer.listen(PORT, () => console.log(`connected to ${PORT}`));
+  });
+  // .catch(err => console.log(err));
