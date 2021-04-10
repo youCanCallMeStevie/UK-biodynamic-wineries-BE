@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const passport = require("passport");
 const apiRoutes = require("./services");
+const httpServer = http.createServer(server);
 
 const cookieParser = require("cookie-parser");
 const {
@@ -42,11 +43,16 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-      server.listen(PORT, () => {
-        if (server.get("env") === "production")
-        console.log("Server is running on CLOUD on PORT:", PORT);
-        console.log("Server is running LOCALLY on PORT: http://localhost:", PORT);
-      })
-    .catch((err) => console.log(err));
-    });
+  // .then(() => {
+  //     server.listen(PORT, () => {
+  //       if (server.get("env") === "production")
+  //       console.log("Server is running on CLOUD on PORT:", PORT);
+  //       console.log("Server is running LOCALLY on PORT: http://localhost:", PORT);
+  //     })
+  //   .catch((err) => console.log(err));
+  //   });
+  .then(() =>
+  httpServer.listen(PORT, () => {
+    console.log("server connected at port ", PORT);
+  })
+);
