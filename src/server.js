@@ -17,7 +17,7 @@ const { PORT, FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
 
 //Initial Set-up
 const server = express();
-PORT || 4000;
+PORT || 5000;
 
 //Middlewares
 server.use(express.json());
