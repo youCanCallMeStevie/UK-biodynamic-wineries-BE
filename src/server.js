@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const passport = require("passport");
 const apiRoutes = require("./services");
-const httpServer = http.createServer(server);
 
 const cookieParser = require("cookie-parser");
 const {
@@ -18,7 +17,7 @@ const { FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
 
 //Initial Set-up
 const server = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
 //Middlewares
 server.use(express.json());
@@ -52,9 +51,7 @@ mongoose
   //   .catch((err) => console.log(err));
   //   });
   .then(() =>
-    server.listen(PORT, () => {
-      console.log(`Our app is running on port ${PORT}`);
-    })
+    server.listen(PORT || 4000)
     .catch((err) => console.log(err))
   );
 
