@@ -18,7 +18,7 @@ const { PORT, FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
 
 //Initial Set-up
 const server = express();
-PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 //Middlewares
 server.use(express.json());
@@ -52,7 +52,11 @@ mongoose
   //   .catch((err) => console.log(err));
   //   });
   .then(() =>
-  httpServer.listen(PORT, () => {
-    console.log("server connected at port ", PORT);
-  })
-);
+    server.listen(PORT, () => {
+      console.log(`Our app is running on port ${PORT}`);
+    })
+  );
+
+// httpServer.listen(PORT, () => {
+//   console.log("server connected at port ", PORT);
+// })
