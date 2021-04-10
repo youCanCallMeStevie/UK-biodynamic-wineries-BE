@@ -55,6 +55,7 @@ mongoose
     server.listen(PORT, () => {
       console.log(`Our app is running on port ${PORT}`);
     })
+    .catch((err) => console.log(err))
   );
 
 // httpServer.listen(PORT, () => {
