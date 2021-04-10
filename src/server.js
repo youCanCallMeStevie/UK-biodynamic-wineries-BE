@@ -14,7 +14,7 @@ const {
 } = require("./middlewares/errorHandling");
 
 require("./utils/auth/strategies/google");
-const { PORT, FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
+const { FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
 
 //Initial Set-up
 const server = express();
