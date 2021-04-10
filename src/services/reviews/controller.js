@@ -1,7 +1,6 @@
 //Initial set-up
 const express = require("express");
 const mongoose = require("mongoose");
-// const q2m = require("query-to-mongo");
 
 //Model
 const ReviewModel = require("./schema");

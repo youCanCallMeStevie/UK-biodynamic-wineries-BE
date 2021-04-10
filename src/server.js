@@ -17,7 +17,7 @@ const { PORT, FE_URL, FE_URL_PROD, MONGO_CONNECTION } = process.env;
 
 //Initial Set-up
 const server = express();
-PORT || 5000;
+// PORT || 5000;
 
 //Middlewares
 server.use(express.json());
@@ -42,12 +42,8 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    .then(
-      server.listen(PORT, () => {
-        if (server.get("env") === "production")
-        console.log("Server is running on CLOUD on PORT:", PORT);
-        console.log("Server is running LOCALLY on PORT: http://localhost:", PORT);
-      })
-    )
-    .catch((err) => console.log(err));
+  .then(() =>
+    httpServer.listen(PORT, () => {
+      console.log("server connected at port ", PORT);
+    })
+  );
