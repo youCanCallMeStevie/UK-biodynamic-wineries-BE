@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const vineyardRoutes = express.Router();
 const reviewRoutes = require("../reviews/routes");
 const moment = require("moment");
-const haversine = require("haversine-distance");
 const sgMail = require("@sendgrid/mail");
 const { MakeTime } = require("astronomy-engine");
 const q2m = require("query-to-mongo");
@@ -18,9 +17,6 @@ const newFollower = require("../../utils/email/newFollower.js");
 const VineyardModel = require("../vineyards/schema");
 const UserModel = require("../users/schema");
 const ReviewModel = require("../reviews/schema");
-
-//query to mongo
-// const q2m = require("query-to-mongo");
 
 //Error Handling
 const ApiError = require("../../utils/ApiError");
