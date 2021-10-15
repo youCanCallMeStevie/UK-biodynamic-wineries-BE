@@ -39,7 +39,7 @@
 
     "multer-storage-cloudinary": "^4.0.0",
     "node-geocoder": "^3.27.0",
-    "nodemon": "^2.0.12",
+    "nodemon": "^2.0.13",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "sun-horizon": "^1.1.4"
