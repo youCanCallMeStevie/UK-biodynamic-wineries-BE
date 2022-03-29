@@ -23,7 +23,7 @@
     "@sendgrid/mail": "^7.4.6",
     "astronomy-engine": "^2.0.6",
 
-    "axios": "^0.21.3",
+    "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.26.3",
     "cookie-parser": "^1.4.5",
